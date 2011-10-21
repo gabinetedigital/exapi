@@ -97,16 +97,18 @@ function exapi_getRecentPosts( $args ) {
         if ( !current_user_can( 'edit_post', $entry['ID'] ) )
             continue;
 
+        $pid = $entry['ID'];
+
         $post_date = mysql2date('Ymd\TH:i:s', $entry['post_date'], false);
         $post_date_gmt = mysql2date('Ymd\TH:i:s', $entry['post_date_gmt'], false);
 
         $categories = array();
-        $catids = wp_get_post_categories( $entry['ID'] );
+        $catids = wp_get_post_categories( $pid );
         foreach ( $catids as $catid )
             $categories[] = get_cat_name( $catid );
 
         $tagnames = array();
-        $tags = wp_get_post_tags( $entry['ID'] );
+        $tags = wp_get_post_tags( $pid );
         if ( !empty( $tags ) ) {
             foreach ( $tags as $tag ) {
                 $tagnames[] = $tag->name;
@@ -117,7 +119,7 @@ function exapi_getRecentPosts( $args ) {
         }
 
         $post = get_extended( $entry['post_content'] );
-        $link = post_permalink( $entry['ID'] );
+        $link = post_permalink( $pid );
 
         // Get the post author info.
         $author = get_userdata( $entry['post_author'] );
@@ -130,19 +132,36 @@ function exapi_getRecentPosts( $args ) {
             $entry['post_status'] = 'publish';
 
         // Get post format
-        $post_format = get_post_format( $entry['ID'] );
+        $post_format = get_post_format( $pid );
         if ( empty( $post_format ) )
             $post_format = 'standard';
+
+        // Post thumbnail
+        $thumb = null;
+        $thumb_info = has_post_thumbnail( $pid ) ?
+            wp_get_attachment_image_src( get_post_thumbnail_id( $pid ), 'full' ) :
+            null;
+        if ( $thumb_info !== null ) {
+            $thumb = array( );
+            $thumb['url'] = $thumb_info[0];
+            $thumb['width'] = $thumb_info[1];
+            $thumb['height'] = $thumb_info[2];
+        }
+
+        // Applying filters against the post content
+        $content = $entry['post_content'];
+        $content = apply_filters('the_content', $content);
+        $content = str_replace(']]>', ']]&gt;', $content);
 
         $struct[] = array(
             'dateCreated' => new IXR_Date($post_date),
             'userid' => $entry['post_author'],
-            'postid' => (string) $entry['ID'],
+            'postid' => (string) $pid,
             'description' => $post['main'],
             'title' => $entry['post_title'],
             'link' => $link,
             'permaLink' => $link,
-            'content' => $entry['post_content'],
+            'content' => $content,
             'categories' => $categories,
             'mt_excerpt' => $entry['post_excerpt'],
             'mt_text_more' => $post['extended'],
@@ -155,8 +174,9 @@ function exapi_getRecentPosts( $args ) {
             'wp_author_display_name' => $author->display_name,
             'date_created_gmt' => new IXR_Date($post_date_gmt),
             'post_status' => $entry['post_status'],
-            'custom_fields' => $wp_xmlrpc_server->get_custom_fields($entry['ID']),
-            'wp_post_format' => $post_format
+            'custom_fields' => $wp_xmlrpc_server->get_custom_fields( $pid ),
+            'wp_post_format' => $post_format,
+            'thumb' => $thumb
         );
     }
 
