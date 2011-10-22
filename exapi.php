@@ -153,6 +153,17 @@ function exapi_getRecentPosts( $args ) {
         $content = apply_filters('the_content', $content);
         $content = str_replace(']]>', ']]&gt;', $content);
 
+        // Excerpt
+        $excerpt = $entry['post_excerpt'];
+        if ( empty( $excerpt ) ) {
+            $divided = explode( ' ', $content );
+            $sliced = array_slice( $divided, 0, 40 );
+            $excerpt = implode( ' ', $sliced );
+            if ( sizeof( $sliced ) < sizeof( $divided ) ) {
+                $excerpt .= ' (...)';
+            }
+        }
+
         $struct[] = array(
             'dateCreated' => new IXR_Date($post_date),
             'userid' => $entry['post_author'],
@@ -176,7 +187,8 @@ function exapi_getRecentPosts( $args ) {
             'post_status' => $entry['post_status'],
             'custom_fields' => $wp_xmlrpc_server->get_custom_fields( $pid ),
             'wp_post_format' => $post_format,
-            'thumb' => $thumb
+            'thumb' => $thumb,
+            'excerpt' => $excerpt
         );
     }
 
