@@ -124,8 +124,10 @@ function exapi_getRecentPosts( $args ) {
         // Get the post author info.
         $author = get_userdata( $entry['post_author'] );
 
+        // Stuff about comments
         $allow_comments = ( $entry['comment_status'] === 'open') ? 1 : 0;
         $allow_pings = ( $entry['ping_status'] === 'open' ) ? 1 : 0;
+        $comments_count = (int) get_comments_number( $pid );
 
         // Consider future posts as published
         if ( $entry['post_status'] === 'future' )
@@ -188,7 +190,8 @@ function exapi_getRecentPosts( $args ) {
             'custom_fields' => $wp_xmlrpc_server->get_custom_fields( $pid ),
             'wp_post_format' => $post_format,
             'thumb' => $thumb,
-            'excerpt' => $excerpt
+            'excerpt' => $excerpt,
+            'comments_count' => $comments_count
         );
     }
 
