@@ -60,9 +60,24 @@ function _exapi_extract_query_params( $args ) {
 
 
 /**
+ * Extracts parameters needed for the getRecentPosts() method
  *
+ * @since 0.1.2
+ *
+ * @param array $args arguments received by the getRecentPosts that must
+ *  be extracted from the array that will be passed to the function that
+ *  extracts query parameters.
  */
-function _exapi_extract_params($args) {
+function _exapi_extract_params(&$args) {
+    $wanted = array('thumbsizes');
+    $found = array();
+    foreach ($wanted as $key) {
+        if (array_key_exists($key, &$args)) {
+            $found[$key] = $args[$key];
+            unset($args[$key]);
+        }
+    }
+    return $found;
 }
 
 
@@ -91,10 +106,12 @@ function exapi_getRecentPosts( $args ) {
 
     // This is a special one, here we find all parameters that will be
     // sent to the `query' param in wp_get_recent_posts()
-    $query = isset( $args[3] ) ?
-        _exapi_extract_query_params( $args[3] ) : array( );
-
-    $params = array( 'thumbsize' => 'full' );
+    $params = $query = null;
+    if (isset($args[3])) {
+        $data = $args[3];
+        $params = _exapi_extract_params($data);
+        $query = _exapi_extract_query_params($data);
+    }
 
     // All methods in this API are being protected
     if ( !$user = wp_xmlrpc_server::login($username, $password) )
@@ -121,7 +138,7 @@ function exapi_getRecentPosts( $args ) {
             'categories' => exapi_post_categories($post),
             'tags' => exapi_post_tags($post),
             'comments' => exapi_post_comment_info($post),
-            'thumbnail' => exapi_post_thumb($post, $params['thumbsize']),
+            'thumbs' => exapi_post_thumb($post, $params),
             'excerpt' => exapi_post_excerpt($post),
             'content' => exapi_post_content($post),
             'post_status' => $post['post_status'],
