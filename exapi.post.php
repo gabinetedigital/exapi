@@ -114,17 +114,28 @@ function exapi_post_comment_info($post) {
  * @param string $size is the name of the size of the thumbnail, the
  *  default value is `full'.
  */
-function exapi_post_thumb($post, $size='full') {
-    $pid = $post['ID'];
-    $thumb = null;
-    if (has_post_thumbnail($pid)) {
-        $info = wp_get_attachment_image_src(get_post_thumbnail_id($pid, $size));
-        $thumb = array( );
-        $thumb['url'] = $info[0];
-        $thumb['width'] = $info[1];
-        $thumb['height'] = $info[2];
+function exapi_post_thumb($post, $params) {
+    $thumbs = array();
+
+    // No thumbnails requested, let's get out
+    if (!array_key_exists('thumbsizes', $params)) {
+        return $thumbs;
     }
-    return $thumb;
+
+    // ok, let's handle the thumbnail request, but only if there's
+    // something to handle, of course.
+    $pid = $post['ID'];
+    if (has_post_thumbnail($pid)) {
+        foreach ($params['thumbsizes'] as $size) {
+            $tid = get_post_thumbnail_id($pid);
+            $info = wp_get_attachment_image_src($tid, $size);
+            $thumbs[$size] = array();
+            $thumbs[$size]['url'] = $info[0];
+            $thumbs[$size]['width'] = $info[1];
+            $thumbs[$size]['height'] = $info[2];
+        }
+    }
+    return $thumbs;
 }
 
 
