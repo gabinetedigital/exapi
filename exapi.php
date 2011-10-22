@@ -26,13 +26,18 @@ Author URI: http://gabinetedigital.rs.gov.br
 License: AGPL3
 */
 
+
+include('exapi.post.php');
+
+
 /**
- * Extract query params from an associative array
+ * Extract query params from an associative array to be passed to the
+ * wordpress API function `wp_get_recent_posts()'
  *
  * @param array $args Search parameters to be extracted and handled
  * @return array
  */
-function _exapi_extract_params( $args ) {
+function _exapi_extract_query_params( $args ) {
     $query = array ( );
     foreach ( $args as $key => $val ) {
         switch ( $key ) {
@@ -51,6 +56,13 @@ function _exapi_extract_params( $args ) {
         }
     }
     return $query;
+}
+
+
+/**
+ *
+ */
+function _exapi_extract_params($args) {
 }
 
 
@@ -80,7 +92,9 @@ function exapi_getRecentPosts( $args ) {
     // This is a special one, here we find all parameters that will be
     // sent to the `query' param in wp_get_recent_posts()
     $query = isset( $args[3] ) ?
-        _exapi_extract_params( $args[3] ) : array( );
+        _exapi_extract_query_params( $args[3] ) : array( );
+
+    $params = array( 'thumbsize' => 'full' );
 
     // All methods in this API are being protected
     if ( !$user = wp_xmlrpc_server::login($username, $password) )
@@ -93,105 +107,25 @@ function exapi_getRecentPosts( $args ) {
 
     // Handling posts found
     $struct = array( );
-    foreach ( $posts_list as $entry ) {
-        if ( !current_user_can( 'edit_post', $entry['ID'] ) )
-            continue;
-
-        $pid = $entry['ID'];
-
-        $post_date = mysql2date('Ymd\TH:i:s', $entry['post_date'], false);
-        $post_date_gmt = mysql2date('Ymd\TH:i:s', $entry['post_date_gmt'], false);
-
-        $categories = array();
-        $catids = wp_get_post_categories( $pid );
-        foreach ( $catids as $catid )
-            $categories[] = get_cat_name( $catid );
-
-        $tagnames = array();
-        $tags = wp_get_post_tags( $pid );
-        if ( !empty( $tags ) ) {
-            foreach ( $tags as $tag ) {
-                $tagnames[] = $tag->name;
-            }
-            $tagnames = implode( ', ', $tagnames );
-        } else {
-            $tagnames = '';
-        }
-
-        $post = get_extended( $entry['post_content'] );
-        $link = post_permalink( $pid );
-
-        // Get the post author info.
-        $author = get_userdata( $entry['post_author'] );
-
-        // Stuff about comments
-        $allow_comments = ( $entry['comment_status'] === 'open') ? 1 : 0;
-        $allow_pings = ( $entry['ping_status'] === 'open' ) ? 1 : 0;
-        $comments_count = (int) get_comments_number( $pid );
-
-        // Consider future posts as published
-        if ( $entry['post_status'] === 'future' )
-            $entry['post_status'] = 'publish';
-
-        // Get post format
-        $post_format = get_post_format( $pid );
-        if ( empty( $post_format ) )
-            $post_format = 'standard';
-
-        // Post thumbnail
-        $thumb = null;
-        $thumb_info = has_post_thumbnail( $pid ) ?
-            wp_get_attachment_image_src( get_post_thumbnail_id( $pid ), 'full' ) :
-            null;
-        if ( $thumb_info !== null ) {
-            $thumb = array( );
-            $thumb['url'] = $thumb_info[0];
-            $thumb['width'] = $thumb_info[1];
-            $thumb['height'] = $thumb_info[2];
-        }
-
-        // Applying filters against the post content
-        $content = $entry['post_content'];
-        $content = apply_filters('the_content', $content);
-        $content = str_replace(']]>', ']]&gt;', $content);
-
-        // Excerpt
-        $excerpt = $entry['post_excerpt'];
-        if ( empty( $excerpt ) ) {
-            $divided = explode( ' ', $content );
-            $sliced = array_slice( $divided, 0, 40 );
-            $excerpt = implode( ' ', $sliced );
-            if ( sizeof( $sliced ) < sizeof( $divided ) ) {
-                $excerpt .= ' (...)';
-            }
-        }
-
+    foreach ( $posts_list as $post ) {
+        $pid = $post['ID'];
+        $post_date = exapi_post_date($post);
         $struct[] = array(
-            'dateCreated' => new IXR_Date($post_date),
-            'userid' => $entry['post_author'],
             'postid' => (string) $pid,
-            'description' => $post['main'],
-            'title' => $entry['post_title'],
-            'link' => $link,
-            'permaLink' => $link,
-            'content' => $content,
-            'categories' => $categories,
-            'mt_excerpt' => $entry['post_excerpt'],
-            'mt_text_more' => $post['extended'],
-            'mt_allow_comments' => $allow_comments,
-            'mt_allow_pings' => $allow_pings,
-            'mt_keywords' => $tagnames,
-            'wp_slug' => $entry['post_name'],
-            'wp_password' => $entry['post_password'],
-            'wp_author_id' => $author->ID,
-            'wp_author_display_name' => $author->display_name,
-            'date_created_gmt' => new IXR_Date($post_date_gmt),
-            'post_status' => $entry['post_status'],
+            'title' => $post['post_title'],
+            'slug' => $post['post_name'],
+            'date' => $post_date,
+            'link' => post_permalink($pid),
+            'format' => (($f = get_post_format($post)) === '' ? 'standard' : $f),
+            'author' => exapi_post_author($post),
+            'categories' => exapi_post_categories($post),
+            'tags' => exapi_post_tags($post),
+            'comments' => exapi_post_comment_info($post),
+            'thumbnail' => exapi_post_thumb($post, $params['thumbsize']),
+            'excerpt' => exapi_post_excerpt($post),
+            'content' => exapi_post_content($post),
+            'post_status' => $post['post_status'],
             'custom_fields' => $wp_xmlrpc_server->get_custom_fields( $pid ),
-            'wp_post_format' => $post_format,
-            'thumb' => $thumb,
-            'excerpt' => $excerpt,
-            'comments_count' => $comments_count
         );
     }
 
