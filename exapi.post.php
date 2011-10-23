@@ -66,8 +66,14 @@ function exapi_post_author($post) {
 function exapi_post_categories($post) {
     $categories = array();
     $catids = wp_get_post_categories($post['ID']);
-    foreach ($catids as $catid)
-        $categories[] = get_cat_name($catid);
+    foreach ($catids as $catid) {
+        $cat = get_category($catid);
+        $categories[] = array(
+            'id' => $catid,
+            'name' => $cat->name,
+            'slug' => $cat->slug
+        );
+    }
     return $categories;
 }
 
