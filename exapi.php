@@ -62,7 +62,7 @@ function _exapi_extract_query_params( $args ) {
 /**
  * Extracts parameters needed for the getRecentPosts() method
  *
- * @since 0.1.2
+ * @since 0.1.1
  *
  * @param array $args arguments received by the getRecentPosts that must
  *  be extracted from the array that will be passed to the function that

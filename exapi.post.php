@@ -24,7 +24,7 @@
 /**
  * Returns date and date in GMT format attributes from a post
  *
- * @since 0.1.2
+ * @since 0.1.1
  *
  * @param array $post is the post array returned by the wordpress
  * function `wp_get_recent_posts()'.
@@ -42,7 +42,7 @@ function exapi_post_date($post) {
 /**
  * Returns some attributes about the user who created a post
  *
- * @since 0.1.2
+ * @since 0.1.1
  *
  * @param array $post is a post returned by wp_get_recent_posts
  */
@@ -59,7 +59,7 @@ function exapi_post_author($post) {
 /**
  * Returns the list of categories of a given post
  *
- * @since 0.1.2
+ * @since 0.1.1
  *
  * @param array $post is a post returned by wp_get_recent_posts()
  */
@@ -81,7 +81,7 @@ function exapi_post_categories($post) {
 /**
  * Returns the list of tags of a given post
  *
- * @since 0.1.2
+ * @since 0.1.1
  *
  * @param array $post is a post returned by wp_get_recent_posts()
  */
@@ -97,7 +97,7 @@ function exapi_post_tags($post) {
 /**
  * Returns basic information about comments in a given post
  *
- * @since 0.1.2
+ * @since 0.1.1
  *
  * @param array $post is a post returned by wp_get_recent_posts()
  */
@@ -114,7 +114,7 @@ function exapi_post_comment_info($post) {
  * Returns information about a specific thumbnail of a post with its
  * size and url
  *
- * @since 0.1.2
+ * @since 0.1.1
  *
  * @param array $post is a post returned by wp_get_recent_posts
  * @param string $size is the name of the size of the thumbnail, the
@@ -148,7 +148,7 @@ function exapi_post_thumb($post, $params) {
 /**
  * Returns the filtered content of a post
  *
- * @since 0.1.2
+ * @since 0.1.1
  *
  * @param array $post is a post returned by wp_get_recent_posts
  */
@@ -162,7 +162,7 @@ function exapi_post_content($post) {
 /**
  * Returns the filtered excerpt of a post
  *
- * @since 0.1.2
+ * @since 0.1.1
  *
  * @param array $post is a post returned by wp_get_recent_posts
  */
