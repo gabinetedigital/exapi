@@ -100,15 +100,14 @@ function exapi_getRecentPosts( $args ) {
     $wp_xmlrpc_server->escape( $args );
 
     // Reading the attribute list
-    $blog_ID = (int) $args[0];
-    $username = $args[1];
-    $password = $args[2];
+    $username = $args[0];
+    $password = $args[1];
 
     // This is a special one, here we find all parameters that will be
     // sent to the `query' param in wp_get_recent_posts()
-    $params = $query = null;
-    if (isset($args[3])) {
-        $data = $args[3];
+    $params = $query = array();
+    if (isset($args[2])) {
+        $data = $args[2];
         $params = _exapi_extract_params($data);
         $query = _exapi_extract_query_params($data);
     }
