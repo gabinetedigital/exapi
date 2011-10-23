@@ -82,6 +82,30 @@ function _exapi_extract_params(&$args) {
 
 
 /**
+ * A shortcut to log the user in before making any `wp_' call and escape
+ * all the received arguments of an exposed method.
+ *
+ * @since 0.1.2
+ *
+ * @params array $args Arguments that will be escaped with a wordpress
+ *  xmlrpc utility
+ */
+function _exapi_method_header(&$args) {
+    // We don't like smart-ass people
+    global $wp_xmlrpc_server;
+    $wp_xmlrpc_server->escape( $args );
+
+    // Reading the attribute list
+    $username = array_shift($args);
+    $password = array_shift($args);
+
+    // All methods in this API are being protected
+    if (!$user = wp_xmlrpc_server::login($username, $password))
+        return wp_xmlrpc_server::error;
+    return $args;
+}
+
+/**
  * Retrieve a list with the most recent posts on the blog.
  *
  * The difference between this method and the blogger or metaWeblog API
@@ -95,26 +119,17 @@ function _exapi_extract_params(&$args) {
  * @return array
  */
 function exapi_getRecentPosts( $args ) {
-    // We don't like smart-ass people
     global $wp_xmlrpc_server;
-    $wp_xmlrpc_server->escape( $args );
-
-    // Reading the attribute list
-    $username = $args[0];
-    $password = $args[1];
+    $args = _exapi_method_header($args);
 
     // This is a special one, here we find all parameters that will be
     // sent to the `query' param in wp_get_recent_posts()
     $params = $query = array();
-    if (isset($args[2])) {
-        $data = $args[2];
+    if (isset($args[0])) {
+        $data = $args[0];
         $params = _exapi_extract_params($data);
         $query = _exapi_extract_query_params($data);
     }
-
-    // All methods in this API are being protected
-    if ( !$user = wp_xmlrpc_server::login($username, $password) )
-        return wp_xmlrpc_server::error;
 
     // Looking for the post list
     $posts_list = wp_get_recent_posts( $query );
