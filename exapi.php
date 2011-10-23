@@ -164,8 +164,46 @@ function exapi_getRecentPosts( $args ) {
 }
 
 
+/**
+ * Returns an array with all information needed to build a tag cloud
+ *
+ * @since 0.1.2
+ *
+ * @param array $args Optional, override the default `wp_tag_cloud()'
+ *  parameters
+ */
+function exapi_getTagCloud($args) {
+    $args = _exapi_method_header($args);
+
+    // We can never echo in xmlrpc
+    $args[0]['echo'] = false;
+
+    // We can't handle any other format. The problem with other formats
+    // is the address of a tag link. They point to the wordpress theme
+    // and it breaks things when you're writting your own wp client.
+    $args[0]['format'] = 'array';
+
+    // Converting the html return in an array of arrays
+    $tags = wp_tag_cloud($args[0]);
+    $ret = array();
+    foreach ($tags as $tag) {
+        $found = array();
+        preg_match_all(
+            "/tag=([^\']+).+style=\'font-size:\s([^;]+).+\>([^<]+)/",
+            $tag, $found);
+        $ret[] = array(
+            'slug' => $found[1][0],
+            'size' => $found[2][0],
+            'name' => $found[3][0]
+        );
+    }
+    return $ret;
+}
+
+
 function exapi_register_methods( $methods ) {
     $methods['exapi.getRecentPosts'] = 'exapi_getRecentPosts';
+    $methods['exapi.getTagCloud'] = 'exapi_getTagCloud';
     return $methods;
 }
 add_filter( 'xmlrpc_methods', 'exapi_register_methods' );
