@@ -120,7 +120,9 @@ function _exapi_method_header(&$args) {
  */
 function exapi_getRecentPosts( $args ) {
     global $wp_xmlrpc_server;
-    $args = _exapi_method_header($args);
+    if (!is_array($args = _exapi_method_header($args))) {
+        return $args;
+    }
 
     // This is a special one, here we find all parameters that will be
     // sent to the `query' param in wp_get_recent_posts()
@@ -173,7 +175,9 @@ function exapi_getRecentPosts( $args ) {
  *  parameters
  */
 function exapi_getTagCloud($args) {
-    $args = _exapi_method_header($args);
+    if (!is_array($args = _exapi_method_header($args))) {
+        return $args;
+    }
 
     // We can never echo in xmlrpc
     $args[0]['echo'] = false;
