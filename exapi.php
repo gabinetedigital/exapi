@@ -100,8 +100,8 @@ function _exapi_method_header(&$args) {
     $password = array_shift($args);
 
     // All methods in this API are being protected
-    if (!$user = wp_xmlrpc_server::login($username, $password))
-        return wp_xmlrpc_server::error;
+    if (!$user = $wp_xmlrpc_server->login($username, $password))
+        return $wp_xmlrpc_server->error;
     return $args;
 }
 
