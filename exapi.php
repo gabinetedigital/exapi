@@ -41,8 +41,8 @@ function _exapi_extract_query_params( $args ) {
     $query = array ( );
     foreach ( $args as $key => $val ) {
         switch ( $key ) {
-        case 'numposts':
-            $query['numposts'] = (int) $val;
+        case 'numberposts':
+            $query['numberposts'] = (int) $val;
             break;
         case 'category':
             $query['category'] = (int) $val;
