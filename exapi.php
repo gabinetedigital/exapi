@@ -186,6 +186,27 @@ function exapi_getRecentPosts( $args ) {
 
 
 /**
+ * Returns all public informations about a post
+ *
+ * @since 0.1.3
+ *
+ * @param array $args An array containing a single element: the post id.
+ */
+function exapi_getPost($args) {
+    if (!is_array($args = _exapi_method_header($args))) {
+        return $args;
+    } else {
+        if (isset($args[0]))
+            $params = _exapi_extract_params($args[0]);
+        else
+            $params = array();
+        $post = get_post($args[1], ARRAY_A);
+        return _exapi_prepare_post($post, $params);
+    }
+}
+
+
+/**
  * Returns an array with all information needed to build a tag cloud
  *
  * @since 0.1.2
@@ -227,6 +248,7 @@ function exapi_getTagCloud($args) {
 function exapi_register_methods( $methods ) {
     $methods['exapi.getRecentPosts'] = 'exapi_getRecentPosts';
     $methods['exapi.getTagCloud'] = 'exapi_getTagCloud';
+    $methods['exapi.getPost'] = 'exapi_getPost';
     return $methods;
 }
 add_filter( 'xmlrpc_methods', 'exapi_register_methods' );
