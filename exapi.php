@@ -105,6 +105,45 @@ function _exapi_method_header(&$args) {
     return $args;
 }
 
+
+/**
+ * Aggregates informations that every post returned by this API should
+ * contain.
+ *
+ * @since 0.1.3
+ *
+ * @param array $post Is the base information returned by the `wp_' API
+ *  used to create a new structure that this function returns.
+ *
+ * @param array $params is an array of parameters that can be used to
+ *  customize the return of this function. Refer to the code of the
+ *  `_exapi_extract_params()' function to know which values you can pass
+ *  here.
+ */
+function _exapi_prepare_post($post, $params) {
+    global $wp_xmlrpc_server;
+    $pid = $post['ID'];
+    $post_date = exapi_post_date($post);
+    return array(
+        'postid' => (string) $pid,
+        'title' => $post['post_title'],
+        'slug' => $post['post_name'],
+        'date' => $post_date,
+        'link' => post_permalink($pid),
+        'format' => (($f = get_post_format($post)) === '' ? 'standard' : $f),
+        'author' => exapi_post_author($post),
+        'categories' => exapi_post_categories($post),
+        'tags' => exapi_post_tags($post),
+        'comments' => exapi_post_comment_info($post),
+        'thumbs' => exapi_post_thumb($post, $params),
+        'excerpt' => exapi_post_excerpt($post),
+        'content' => exapi_post_content($post),
+        'post_status' => $post['post_status'],
+        'custom_fields' => $wp_xmlrpc_server->get_custom_fields($pid),
+    );
+}
+
+
 /**
  * Retrieve a list with the most recent posts on the blog.
  *
@@ -119,7 +158,6 @@ function _exapi_method_header(&$args) {
  * @return array
  */
 function exapi_getRecentPosts( $args ) {
-    global $wp_xmlrpc_server;
     if (!is_array($args = _exapi_method_header($args))) {
         return $args;
     }
@@ -141,27 +179,8 @@ function exapi_getRecentPosts( $args ) {
     // Handling posts found
     $struct = array( );
     foreach ( $posts_list as $post ) {
-        $pid = $post['ID'];
-        $post_date = exapi_post_date($post);
-        $struct[] = array(
-            'postid' => (string) $pid,
-            'title' => $post['post_title'],
-            'slug' => $post['post_name'],
-            'date' => $post_date,
-            'link' => post_permalink($pid),
-            'format' => (($f = get_post_format($post)) === '' ? 'standard' : $f),
-            'author' => exapi_post_author($post),
-            'categories' => exapi_post_categories($post),
-            'tags' => exapi_post_tags($post),
-            'comments' => exapi_post_comment_info($post),
-            'thumbs' => exapi_post_thumb($post, $params),
-            'excerpt' => exapi_post_excerpt($post),
-            'content' => exapi_post_content($post),
-            'post_status' => $post['post_status'],
-            'custom_fields' => $wp_xmlrpc_server->get_custom_fields( $pid ),
-        );
+        $struct[] = _exapi_prepare_post($post, $params);
     }
-
     return $struct;
 }
 
