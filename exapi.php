@@ -125,7 +125,7 @@ function _exapi_prepare_post($post, $params) {
     $pid = $post['ID'];
     $post_date = exapi_post_date($post);
     return array(
-        'postid' => (string) $pid,
+        'id' => (string) $pid,
         'title' => $post['post_title'],
         'slug' => $post['post_name'],
         'date' => $post_date,
