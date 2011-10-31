@@ -207,6 +207,26 @@ function exapi_getPost($args) {
 
 
 /**
+ * Returns all public informations of a page given it's path
+ *
+ * @param array $args An array containing a single element: The page
+ *  path. This path is composed by the slugs of pages hierarchically.
+ */
+function exapi_getPageByPath($args) {
+    if (!is_array($args = _exapi_method_header($args))) {
+        return $args;
+    } else {
+        if (($orig = get_page_by_path($args[1], ARRAY_A)) === null)
+            return null;
+        $page = _exapi_prepare_post($orig, $params);
+        foreach (array('format', 'categories', 'tags') as $key)
+            unset($page[$key]);
+        return $page;
+    }
+}
+
+
+/**
  * Returns an array with all information needed to build a tag cloud
  *
  * @since 0.1.2
@@ -249,6 +269,7 @@ function exapi_register_methods( $methods ) {
     $methods['exapi.getRecentPosts'] = 'exapi_getRecentPosts';
     $methods['exapi.getTagCloud'] = 'exapi_getTagCloud';
     $methods['exapi.getPost'] = 'exapi_getPost';
+    $methods['exapi.getPageByPath'] = 'exapi_getPageByPath';
     return $methods;
 }
 add_filter( 'xmlrpc_methods', 'exapi_register_methods' );
