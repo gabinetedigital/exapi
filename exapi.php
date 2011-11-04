@@ -306,6 +306,11 @@ function exapi_getPostsByTag($args) {
     return $ret;
 }
 
+function exapi_getComments($args) {
+    global $wp_xmlrpc_server;
+    return  $wp_xmlrpc_server->wp_getComments($args);
+}
+
 function exapi_register_methods( $methods ) {
     $methods['exapi.getRecentPosts'] = 'exapi_getRecentPosts';
     $methods['exapi.getTagCloud'] = 'exapi_getTagCloud';
@@ -314,6 +319,7 @@ function exapi_register_methods( $methods ) {
     $methods['exapi.getMainSidebar'] = 'exapi_getMainSidebar';
     $methods['exapi.getPostsByCategory'] = 'exapi_getPostsByCategory';
     $methods['exapi.getPostsByTag'] = 'exapi_getPostsByTag';
+    $methods['exapi.getComments'] = 'exapi_getComments';
     return $methods;
 }
 add_filter( 'xmlrpc_methods', 'exapi_register_methods' );
