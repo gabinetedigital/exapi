@@ -272,8 +272,37 @@ function exapi_getMainSidebar($args) {
 
     ob_start();
     dynamic_sidebar('sidebar-1');
-    $ret = array('html' => ob_get_contents());
+    $ret = ob_get_contents();
     ob_end_clean();
+    return $ret;
+}
+
+function exapi_getPostsByCategory($args) {
+    if (!is_array($args = _exapi_method_header($args))) {
+        return $args;
+    }
+    $ret = array();
+    global $post;
+    query_posts('cat='.$args[0]['cat'].'&paged='.$args[0]['page']);
+    while ( have_posts() ) {
+        the_post();
+        $ret[] = _exapi_prepare_post((array)$post, array());
+    }
+    return $ret;
+}
+
+
+function exapi_getPostsByTag($args) {
+    if (!is_array($args = _exapi_method_header($args))) {
+        return $args;
+    }
+    $ret = array();
+    global $post;
+    query_posts('tag='.$args[0]['tag'].'&paged='.$args[0]['page']);
+    while ( have_posts() ) {
+        the_post();
+        $ret[] = _exapi_prepare_post((array)$post, array());
+    }
     return $ret;
 }
 
@@ -283,6 +312,8 @@ function exapi_register_methods( $methods ) {
     $methods['exapi.getPost'] = 'exapi_getPost';
     $methods['exapi.getPageByPath'] = 'exapi_getPageByPath';
     $methods['exapi.getMainSidebar'] = 'exapi_getMainSidebar';
+    $methods['exapi.getPostsByCategory'] = 'exapi_getPostsByCategory';
+    $methods['exapi.getPostsByTag'] = 'exapi_getPostsByTag';
     return $methods;
 }
 add_filter( 'xmlrpc_methods', 'exapi_register_methods' );
