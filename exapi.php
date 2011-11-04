@@ -265,12 +265,24 @@ function exapi_getTagCloud($args) {
     return $ret;
 }
 
+function exapi_getMainSidebar($args) {
+    if (!is_array($args = _exapi_method_header($args))) {
+        return $args;
+    }
+
+    ob_start();
+    dynamic_sidebar('sidebar-1');
+    $ret = array('html' => ob_get_contents());
+    ob_end_clean();
+    return $ret;
+}
 
 function exapi_register_methods( $methods ) {
     $methods['exapi.getRecentPosts'] = 'exapi_getRecentPosts';
     $methods['exapi.getTagCloud'] = 'exapi_getTagCloud';
     $methods['exapi.getPost'] = 'exapi_getPost';
     $methods['exapi.getPageByPath'] = 'exapi_getPageByPath';
+    $methods['exapi.getMainSidebar'] = 'exapi_getMainSidebar';
     return $methods;
 }
 add_filter( 'xmlrpc_methods', 'exapi_register_methods' );
