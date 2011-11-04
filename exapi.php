@@ -96,6 +96,7 @@ function _exapi_method_header(&$args) {
     $wp_xmlrpc_server->escape( $args );
 
     // Reading the attribute list
+    $blog_id = array_shift($args); //#TODO: abandoned
     $username = array_shift($args);
     $password = array_shift($args);
 
