@@ -325,9 +325,20 @@ function exapi_newComment($args) {
                               'comment_parent' => 0,
                               'content' => $args[3]['content']));
     global $wp_xmlrpc_server;
-    error_log("sending : ". var_export($param, true));
-    $ret = $wp_xmlrpc_server->wp_newComment($param);
-    error_log("result: ". var_export($ret, true));
+    return $wp_xmlrpc_server->wp_newComment($param);
+}
+
+function exapi_search($args) {
+    if (!is_array($args = _exapi_method_header($args))) {
+        return $args;
+    }
+    $ret = array();
+    global $post;
+    query_posts('s='.$args[0]['s'].'&paged='.$args[0]['page']);
+    while ( have_posts() ) {
+        the_post();
+        $ret[] = _exapi_prepare_post((array)$post, array());
+    }
     return $ret;
 }
 
@@ -341,6 +352,7 @@ function exapi_register_methods( $methods ) {
     $methods['exapi.getPostsByTag'] = 'exapi_getPostsByTag';
     $methods['exapi.getComments'] = 'exapi_getComments';
     $methods['exapi.newComment'] = 'exapi_newComment';
+    $methods['exapi.search'] = 'exapi_search';
     return $methods;
 }
 add_filter( 'xmlrpc_methods', 'exapi_register_methods' );
