@@ -311,6 +311,26 @@ function exapi_getComments($args) {
     return  $wp_xmlrpc_server->wp_getComments($args);
 }
 
+function exapi_newComment($args) {
+    if (strlen($args[3]['content']) == 0) {
+        return new IXR_Error( 403, __('Error: please type a comment.'));
+    }
+
+    $param = array(
+                   0 => $args[0],
+                   1 => $args[3]['username'],
+                   2 => $args[3]['password'],
+                   3 => $args[3]['post_id'],
+                   4 => array(
+                              'comment_parent' => 0,
+                              'content' => $args[3]['content']));
+    global $wp_xmlrpc_server;
+    error_log("sending : ". var_export($param, true));
+    $ret = $wp_xmlrpc_server->wp_newComment($param);
+    error_log("result: ". var_export($ret, true));
+    return $ret;
+}
+
 function exapi_register_methods( $methods ) {
     $methods['exapi.getRecentPosts'] = 'exapi_getRecentPosts';
     $methods['exapi.getTagCloud'] = 'exapi_getTagCloud';
@@ -320,6 +340,7 @@ function exapi_register_methods( $methods ) {
     $methods['exapi.getPostsByCategory'] = 'exapi_getPostsByCategory';
     $methods['exapi.getPostsByTag'] = 'exapi_getPostsByTag';
     $methods['exapi.getComments'] = 'exapi_getComments';
+    $methods['exapi.newComment'] = 'exapi_newComment';
     return $methods;
 }
 add_filter( 'xmlrpc_methods', 'exapi_register_methods' );
