@@ -307,10 +307,12 @@ function exapi_getPostsByTag($args) {
 
 function exapi_getComments($args) {
     global $wp_xmlrpc_server;
+    array_unshift($args, 0);
     return  $wp_xmlrpc_server->wp_getComments($args);
 }
 
 function exapi_newComment($args) {
+    array_unshift($args, 0);
     if (strlen($args[3]['content']) == 0) {
         return new IXR_Error( 403, __('Error: please type a comment.'));
     }
