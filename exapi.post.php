@@ -169,7 +169,7 @@ function exapi_post_content($post) {
 function exapi_post_excerpt($post) {
     $excerpt = $post['post_excerpt'];
     if (empty($excerpt)) {
-        $content = exapi_post_content($post);
+        $content = strip_tags(exapi_post_content($post));
         $divided = explode(' ', $content);
         $sliced = array_slice($divided, 0, 40);
         $excerpt = implode(' ', $sliced);
