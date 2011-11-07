@@ -213,16 +213,17 @@ function exapi_getPost($args) {
  *  path. This path is composed by the slugs of pages hierarchically.
  */
 function exapi_getPageByPath($args) {
-    if (!is_array($args = _exapi_method_header($args))) {
+    if (!is_array($args = _exapi_method_header($args)))
         return $args;
-    } else {
-        if (($orig = get_page_by_path($args[1], ARRAY_A)) === null)
-            return null;
-        $page = _exapi_prepare_post($orig, $params);
-        foreach (array('format', 'categories', 'tags') as $key)
-            unset($page[$key]);
-        return $page;
-    }
+    if (!isset($args[1]))
+        return null;
+    if (($orig = get_page_by_path($args[1], ARRAY_A)) === null)
+        return null;
+    $params = isset($args[0]) ? _exapi_extract_params($args[0]) : array();
+    $page = _exapi_prepare_post($orig, $params);
+    foreach (array('format', 'categories', 'tags') as $key)
+        unset($page[$key]);
+    return $page;
 }
 
 
