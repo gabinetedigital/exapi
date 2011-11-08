@@ -333,6 +333,34 @@ function exapi_getPostsByTag($args) {
                  'pagination' => $pag);
 }
 
+function exapi_getPosts($args) {
+    if (!is_array($args = _exapi_method_header($args))) {
+        return $args;
+    }
+    $posts = array();
+    global $post;
+    query_posts('paged='.$args[0]['page']);
+    while ( have_posts() ) {
+        the_post();
+        $posts[] = _exapi_prepare_post((array)$post, array());
+    }
+
+    global $wp_query;
+
+    $pag =
+        paginate_links(
+                       array(
+                             'base' => '/news/%#%', //you are not seeing this
+                             'format' => '?paged=%#%',
+                             'current' => max( 1, get_query_var('paged') ),
+                             'total' => $wp_query->max_num_pages
+                             ));
+
+    return array(
+                 'posts' => $posts,
+                 'pagination' => $pag);
+}
+
 function exapi_getComments($args) {
     global $wp_xmlrpc_server;
     array_unshift($args, 0);
@@ -394,6 +422,7 @@ function exapi_register_methods( $methods ) {
     $methods['exapi.getPostsByTag'] = 'exapi_getPostsByTag';
     $methods['exapi.getComments'] = 'exapi_getComments';
     $methods['exapi.newComment'] = 'exapi_newComment';
+    $methods['exapi.getPosts'] = 'exapi_getPosts';
     $methods['exapi.search'] = 'exapi_search';
     return $methods;
 }
