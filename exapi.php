@@ -281,14 +281,27 @@ function exapi_getPostsByCategory($args) {
     if (!is_array($args = _exapi_method_header($args))) {
         return $args;
     }
-    $ret = array();
+    $posts = array();
     global $post;
     query_posts('cat='.$args[0]['cat'].'&paged='.$args[0]['page']);
     while ( have_posts() ) {
         the_post();
-        $ret[] = _exapi_prepare_post((array)$post, array());
+        $posts[] = _exapi_prepare_post((array)$post, array());
     }
-    return $ret;
+
+    global $wp_query;
+
+    $pag =
+        paginate_links(
+                       array(
+                             'base' => '/cat/'.$args[0]['cat'].'/%#%',
+                             'format' => '?paged=%#%',
+                             'current' => max( 1, get_query_var('paged') ),
+                             'total' => $wp_query->max_num_pages
+                             ));
+    return array(
+                 'posts' => $posts,
+                 'pagination' => $pag);
 }
 
 
@@ -296,14 +309,28 @@ function exapi_getPostsByTag($args) {
     if (!is_array($args = _exapi_method_header($args))) {
         return $args;
     }
-    $ret = array();
+    $posts = array();
     global $post;
     query_posts('tag='.$args[0]['tag'].'&paged='.$args[0]['page']);
     while ( have_posts() ) {
         the_post();
-        $ret[] = _exapi_prepare_post((array)$post, array());
+        $posts[] = _exapi_prepare_post((array)$post, array());
     }
-    return $ret;
+
+    global $wp_query;
+
+    $pag =
+        paginate_links(
+                       array(
+                             'base' => '/tag/'.$args[0]['tag'].'/%#%',
+                             'format' => '?paged=%#%',
+                             'current' => max( 1, get_query_var('paged') ),
+                             'total' => $wp_query->max_num_pages
+                             ));
+
+    return array(
+                 'posts' => $posts,
+                 'pagination' => $pag);
 }
 
 function exapi_getComments($args) {
