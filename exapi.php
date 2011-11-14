@@ -1,5 +1,6 @@
 <?php /* -*- Mode: php; c-basic-offset:4; -*- */
-/* Copyright (C) 2011  Lincoln de Sousa <lincoln@comum.org>
+/* Copyright (C) 2011  Governo do Estado do Rio Grande do Sul
+ * Copyright (C) 2011  Lincoln de Sousa <lincoln@comum.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -341,28 +342,41 @@ function exapi_getPosts($args) {
     if (!is_array($args = _exapi_method_header($args))) {
         return $args;
     }
-    $posts = array();
+
     global $post;
-    query_posts('paged='.$args[0]['page']);
-    while ( have_posts() ) {
+    global $wp_query;
+
+    $query = array_merge(
+        $wp_query->query === null ? array() : $wp_query->query,
+        _exapi_extract_query_params($args[0]));
+
+    /* A small translation, query_posts does not expect the "category"
+     * parameter, but the "cat" one */
+    if (isset($query['category'])) {
+        $query['cat'] = $query['category'];
+        unset($query['category']);
+    }
+    query_posts($query);
+
+    $posts = array();
+    while (have_posts()) {
         the_post();
         $posts[] = _exapi_prepare_post((array)$post, array());
     }
 
     global $wp_query;
-
-    $pag =
-        paginate_links(
-                       array(
-                             'base' => '/news/%#%', //you are not seeing this
-                             'format' => '?paged=%#%',
-                             'current' => max( 1, get_query_var('paged') ),
-                             'total' => $wp_query->max_num_pages
-                             ));
-
+    $pag = paginate_links(
+        array(
+            'base' => '/news/%#%', // you are not seeing this
+            'format' => '?paged=%#%',
+            'current' => max(1, get_query_var('paged')),
+            'total' => $wp_query->max_num_pages
+        )
+    );
     return array(
-                 'posts' => $posts,
-                 'pagination' => $pag);
+        'posts' => $posts,
+        'pagination' => $pag
+    );
 }
 
 function exapi_getComments($args) {
