@@ -251,6 +251,9 @@ function exapi_getTagCloud($args) {
 
     // Converting the html return in an array of arrays
     $tags = wp_tag_cloud($args[0]);
+    if ($tags === null)
+        $tags = array();
+
     $ret = array();
     foreach ($tags as $tag) {
         $found = array();
