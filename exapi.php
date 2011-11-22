@@ -280,7 +280,7 @@ function exapi_getSidebar($args) {
     ob_start();
     if (!dynamic_sidebar($args[0]['id'])) {
         $ret = new IXR_Error( 403,
-                              __('Error: sidebar '.$args[0]['id'].' found.'));
+                              __('Error: sidebar '.$args[0]['id'].' not found.'));
     } else {
         $ret = ob_get_contents();
     }
