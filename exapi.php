@@ -422,7 +422,7 @@ function exapi_search($args) {
     $pag =
         paginate_links(
                        array(
-                             'base' => '/search/'.$args[0]['s'].'/%#%',
+                             'base' => '/search/%#%?s=' . $args[0]['s'],
                              'format' => '?paged=%#%',
                              'current' => max( 1, get_query_var('paged') ),
                              'total' => $wp_query->max_num_pages
