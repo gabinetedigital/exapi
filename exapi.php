@@ -52,6 +52,9 @@ function _exapi_extract_query_params( $args ) {
             $catObject = get_category_by_slug( $val );
             $query['category'] = $catObject->term_id;;
             break;
+        case 'page':
+            $query['paged'] = (int) $val;
+            break;
         default:
             $query[$key] = $val;
         }
