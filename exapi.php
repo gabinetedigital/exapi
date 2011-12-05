@@ -388,6 +388,9 @@ function exapi_getPosts($args) {
         $query['cat'] = $query['category'];
         unset($query['category']);
     }
+
+    $query['paged'] = $args[0]['page'];
+
     query_posts($query);
 
     $posts = array();
