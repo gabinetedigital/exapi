@@ -375,7 +375,7 @@ function exapi_getPosts($args) {
         array(
             'base' => '/news/%#%', // you are not seeing this
             'format' => '?paged=%#%',
-            'current' => max(1, get_query_var('paged')),
+            'current' => max(1, $args[0]['page']),
             'total' => $wp_query->max_num_pages
         )
     );
