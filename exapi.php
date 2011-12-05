@@ -315,6 +315,32 @@ function exapi_getPostsByCategory($args) {
                  'pagination' => $pag);
 }
 
+function exapi_getArchivePosts($args) {
+    if (!is_array($args = _exapi_method_header($args))) {
+        return $args;
+    }
+    $posts = array();
+    global $post;
+    query_posts('m='.$args[0]['m'].'&paged='.$args[0]['page']);
+    while ( have_posts() ) {
+        the_post();
+        $posts[] = _exapi_prepare_post((array)$post, array());
+    }
+
+    global $wp_query;
+
+    $pag =
+        paginate_links(
+                       array(
+                             'base' => '/cat/'.$args[0]['cat'].'/%#%',
+                             'format' => '?paged=%#%',
+                             'current' => max( 1, get_query_var('paged') ),
+                             'total' => $wp_query->max_num_pages
+                             ));
+    return array(
+                 'posts' => $posts,
+                 'pagination' => $pag);
+}
 
 function exapi_getPostsByTag($args) {
     if (!is_array($args = _exapi_method_header($args))) {
@@ -443,6 +469,7 @@ function exapi_register_methods( $methods ) {
     $methods['exapi.getPageByPath'] = 'exapi_getPageByPath';
     $methods['exapi.getSidebar'] = 'exapi_getSidebar';
     $methods['exapi.getPostsByCategory'] = 'exapi_getPostsByCategory';
+    $methods['exapi.getArchivePosts'] = 'exapi_getArchivePosts';
     $methods['exapi.getPostsByTag'] = 'exapi_getPostsByTag';
     $methods['exapi.getComments'] = 'exapi_getComments';
     $methods['exapi.newComment'] = 'exapi_newComment';
