@@ -99,6 +99,9 @@ function _exapi_method_header(&$args) {
     global $wp_xmlrpc_server;
     $wp_xmlrpc_server->escape( $args );
 
+    // getting rid of blog_id
+    array_shift($args);
+
     // Reading the attribute list
     $username = array_shift($args);
     $password = array_shift($args);
@@ -349,6 +352,7 @@ function exapi_getPostsByTag($args) {
     $posts = array();
     global $post;
     query_posts('tag='.$args[0]['tag'].'&paged='.$args[0]['page']);
+
     while ( have_posts() ) {
         the_post();
         $posts[] = _exapi_prepare_post((array)$post, array());
@@ -416,7 +420,6 @@ function exapi_getPosts($args) {
 
 function exapi_getComments($args) {
     global $wp_xmlrpc_server;
-    array_unshift($args, 0);
     return  $wp_xmlrpc_server->wp_getComments($args);
 }
 
