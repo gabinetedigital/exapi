@@ -431,12 +431,12 @@ function exapi_newComment($args) {
 
     $param = array(
                    0 => $args[0],
-                   1 => $args[3]['username'],
-                   2 => $args[3]['password'],
-                   3 => $args[3]['post_id'],
+                   1 => $args[4]['username'],
+                   2 => $args[4]['password'],
+                   3 => $args[4]['post_id'],
                    4 => array(
                               'comment_parent' => 0,
-                              'content' => $args[3]['content']));
+                              'content' => $args[4]['content']));
     global $wp_xmlrpc_server;
     return $wp_xmlrpc_server->wp_newComment($param);
 }
