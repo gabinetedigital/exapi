@@ -76,7 +76,7 @@ function _exapi_extract_params(&$args) {
     $wanted = array('thumbsizes');
     $found = array();
     foreach ($wanted as $key) {
-        if (array_key_exists($key, &$args)) {
+        if (array_key_exists($key, $args)) {
             $found[$key] = $args[$key];
             unset($args[$key]);
         }
@@ -420,7 +420,19 @@ function exapi_getPosts($args) {
 
 function exapi_getComments($args) {
     global $wp_xmlrpc_server;
-    return  $wp_xmlrpc_server->wp_getComments($args);
+
+    // This verify if any comment have meta information
+    $comentarios = array();
+    $comments = $wp_xmlrpc_server->wp_getComments($args);
+    foreach ($comments as $comment) {
+        $categoria = get_comment_meta ( $comment['comment_id'], 'categoria_sugestao', true );
+        if ($categoria != null) {
+            $comment['categoria_sugestao'] = $categoria;
+        }
+        array_push($comentarios, $comment);
+    }
+
+    return $comentarios;
 }
 
 function exapi_newComment($args) {
@@ -438,7 +450,13 @@ function exapi_newComment($args) {
                               'comment_parent' => 0,
                               'content' => $args[4]['content']));
     global $wp_xmlrpc_server;
-    return $wp_xmlrpc_server->wp_newComment($param);
+    $comment_id = $wp_xmlrpc_server->wp_newComment($param);
+
+    if( $args[4]['categoria_sugestao'] ){
+        add_comment_meta($comment_id, 'categoria_sugestao', $args[4]['categoria_sugestao'], true);
+    }
+
+    return $comment_id;
 }
 
 function exapi_search($args) {
