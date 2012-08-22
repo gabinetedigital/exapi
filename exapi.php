@@ -486,6 +486,31 @@ function exapi_search($args) {
                  'pagination' => $pag);
 }
 
+//Novo método que retorna os Itens de um menu do wordpress
+function exapi_getMenuItens($args) {
+
+    if (!is_array($args = _exapi_method_header($args))) {
+        return $args;
+    }
+    $menu_name =  $args[0]['menu_slug'];
+
+    $menu = wp_get_nav_menu_object( $menu_name );
+
+    $menu_items = wp_get_nav_menu_items($menu->term_id);
+
+    $menu_list = '';
+    //$menu_list = '<ul id="menu-' . $menu_name . '">';
+
+    foreach ( (array) $menu_items as $key => $menu_item ) {
+        $title = $menu_item->title;
+        $url = $menu_item->url;
+        $menu_list .= '<li><a href="' . $url . '">' . $title . '</a></li>';
+    }
+    //$menu_list .= '</ul>';
+
+    return $menu_list;
+}
+
 function exapi_register_methods( $methods ) {
     $methods['exapi.getRecentPosts'] = 'exapi_getRecentPosts';
     $methods['exapi.getTagCloud'] = 'exapi_getTagCloud';
@@ -499,6 +524,7 @@ function exapi_register_methods( $methods ) {
     $methods['exapi.newComment'] = 'exapi_newComment';
     $methods['exapi.getPosts'] = 'exapi_getPosts';
     $methods['exapi.search'] = 'exapi_search';
+    $methods['exapi.getMenuItens'] = 'exapi_getMenuItens';
     return $methods;
 }
 add_filter( 'xmlrpc_methods', 'exapi_register_methods' );
