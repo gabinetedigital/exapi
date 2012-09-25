@@ -381,6 +381,11 @@ function exapi_getPosts($args) {
 
     global $post;
     global $wp_query;
+	
+	$params = array();
+    if (isset($args[0])) {
+        $params = _exapi_extract_params($args[0]);
+    }
 
     $query = array_merge(
         $wp_query->query === null ? array() : $wp_query->query,
@@ -400,7 +405,7 @@ function exapi_getPosts($args) {
     $posts = array();
     while (have_posts()) {
         the_post();
-        $posts[] = _exapi_prepare_post((array)$post, array());
+        $posts[] = _exapi_prepare_post((array)$post, $params);
     }
 
     global $wp_query;
