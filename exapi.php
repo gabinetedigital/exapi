@@ -146,6 +146,7 @@ function _exapi_prepare_post($post, $params) {
         'excerpt' => exapi_post_excerpt($post),
         'content' => exapi_post_content($post),
         'post_status' => $post['post_status'],
+        'post_type' => get_post_type( $pid ), 
         'custom_fields' => $wp_xmlrpc_server->get_custom_fields($pid),
     );
 }
