@@ -510,7 +510,11 @@ function exapi_getMenuItens($args) {
     foreach ( (array) $menu_items as $key => $menu_item ) {
         $title = $menu_item->title;
         $url = $menu_item->url;
-        $menu_list .= '<li><a href="' . $url . '">' . $title . '</a></li>';
+        if($menu_item->attr_title){
+            $menu_list .= '<li><a href="' . $url . '" data-link="' . $menu_item->attr_title . '" >' . $title . '</a></li>';
+        }else{
+            $menu_list .= '<li><a href="' . $url . '">' . $title . '</a></li>';
+        }
     }
     //$menu_list .= '</ul>';
 
