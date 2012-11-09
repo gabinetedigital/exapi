@@ -469,12 +469,17 @@ function exapi_search($args) {
     if (!is_array($args = _exapi_method_header($args))) {
         return $args;
     }
+	
+	$params = array();
+    if (isset($args[0])) {
+        $params = _exapi_extract_params($args[0]);
+    }
     $posts = array();
     global $post;
     query_posts('s='.$args[0]['s'].'&paged='.$args[0]['page']);
     while ( have_posts() ) {
         the_post();
-        $posts[] = _exapi_prepare_post((array)$post, array());
+        $posts[] = _exapi_prepare_post((array)$post, $params);
     }
     global $wp_query;
 
@@ -521,6 +526,16 @@ function exapi_getMenuItens($args) {
     return $menu_list;
 }
 
+function exapi_getAttachmentUrl($args){
+	if (!is_array($args = _exapi_method_header($args))) {
+        return $args;
+    }
+	
+	$url = wp_get_attachment_url( $args[0]['postid'] );
+	
+	return $url;
+}
+
 function exapi_register_methods( $methods ) {
     $methods['exapi.getRecentPosts'] = 'exapi_getRecentPosts';
     $methods['exapi.getTagCloud'] = 'exapi_getTagCloud';
@@ -535,6 +550,7 @@ function exapi_register_methods( $methods ) {
     $methods['exapi.getPosts'] = 'exapi_getPosts';
     $methods['exapi.search'] = 'exapi_search';
     $methods['exapi.getMenuItens'] = 'exapi_getMenuItens';
+	$methods['exapi.getAttachmentUrl'] = 'exapi_getAttachmentUrl';
     return $methods;
 }
 add_filter( 'xmlrpc_methods', 'exapi_register_methods' );
