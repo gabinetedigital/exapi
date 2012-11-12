@@ -482,11 +482,13 @@ function exapi_search($args) {
         $posts[] = _exapi_prepare_post((array)$post, $params);
     }
     global $wp_query;
+	
+	$txtsearch = str_replace(" ", "+", $args[0]['s']);
 
     $pag =
         paginate_links(
                        array(
-                             'base' => '/search/%#%?s=' . $args[0]['s'],
+                             'base' => '/search/%#%?s=' . $txtsearch,
                              'format' => '?paged=%#%',
                              'current' => max( 1, get_query_var('paged') ),
                              'total' => $wp_query->max_num_pages
