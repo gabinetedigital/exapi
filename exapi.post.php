@@ -93,6 +93,10 @@ function exapi_post_tags($post) {
     return implode(', ', $tagnames);
 }
 
+function exapi_post_tags_object($post) {
+    return wp_get_post_tags($post['ID']);
+}
+
 
 /**
  * Returns basic information about comments in a given post

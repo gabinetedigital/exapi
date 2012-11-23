@@ -141,6 +141,7 @@ function _exapi_prepare_post($post, $params) {
         'author' => exapi_post_author($post),
         'categories' => exapi_post_categories($post),
         'tags' => exapi_post_tags($post),
+        'tags_object' => exapi_post_tags_object($post),
         'comments' => exapi_post_comment_info($post),
         'thumbs' => exapi_post_thumb($post, $params),
         'excerpt' => exapi_post_excerpt($post),
