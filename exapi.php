@@ -235,6 +235,35 @@ function exapi_getPageByPath($args) {
     return $page;
 }
 
+/**
+ * Returns all public informations of a page given it's path
+ *
+ * @param array $args An array containing a single element: The page
+ *  path. This path is composed by the slugs of pages hierarchically.
+ */
+function exapi_getPostByPath($args) {
+    if (!is_array($args = _exapi_method_header($args)))
+        return $args;
+    if (!isset($args[1]))
+        return null;
+    error_log(' ======================================== ARGS ======================================== ');
+    error_log(print_r($args, True));
+    $the_slug = $args[1];
+    $query=array(
+      'name' => $the_slug,
+      'post_type' => 'post',
+      'post_status' => 'publish',
+      'numberposts' => 1
+    );
+    $my_posts = get_posts($query);
+    error_log( print_r( (array)$my_posts[0], True) );
+    if( $my_posts ) {
+        error_log( 'ID on the first post found '.$my_posts[0]->ID );
+    }
+    $post = _exapi_prepare_post( (array)$my_posts[0], $args);
+    // return $my_posts[0];
+    return $post;
+}
 
 /**
  * Returns an array with all information needed to build a tag cloud
@@ -544,6 +573,7 @@ function exapi_register_methods( $methods ) {
     $methods['exapi.getTagCloud'] = 'exapi_getTagCloud';
     $methods['exapi.getPost'] = 'exapi_getPost';
     $methods['exapi.getPageByPath'] = 'exapi_getPageByPath';
+    $methods['exapi.getPostByPath'] = 'exapi_getPostByPath';
     $methods['exapi.getSidebar'] = 'exapi_getSidebar';
     $methods['exapi.getPostsByCategory'] = 'exapi_getPostsByCategory';
     $methods['exapi.getArchivePosts'] = 'exapi_getArchivePosts';
