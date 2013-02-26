@@ -265,6 +265,65 @@ function exapi_getPostByPath($args) {
     return $post;
 }
 
+function exapi_getCustomPostByPath($args) {
+    if (!is_array($args = _exapi_method_header($args)))
+        return $args;
+    if (!isset($args[1]))
+        return null;
+    if (!isset($args[2]))
+        return null;
+    error_log(' ======================================== ARGS ======================================== ');
+    error_log(print_r($args, True));
+    $post_type = $args[1];
+    $the_slug = $args[2];
+    $query=array(
+      'name' => $the_slug,
+      'post_type' => $post_type,
+      'post_status' => 'publish',
+      'numberposts' => 1
+    );
+    $my_posts = get_posts($query);
+    error_log( print_r( (array)$my_posts[0], True) );
+    if( $my_posts ) {
+        error_log( 'ID on the first post found '.$my_posts[0]->ID );
+    }
+    $post = _exapi_prepare_post( (array)$my_posts[0], $args);
+    // return $my_posts[0];
+    return $post;
+}
+
+function exapi_getCustomPostByParent($args) {
+    if (!is_array($args = _exapi_method_header($args)))
+        return $args;
+    if (!isset($args[1]))
+        return null;
+    if (!isset($args[2]))
+        return null;
+    error_log(' ======================================== ARGS ======================================== ');
+    error_log(print_r($args, True));
+    $post_type = $args[1];
+    $the_parent = $args[2];
+    $query=array(
+      'post_parent' => $the_parent,
+      'post_type' => $post_type,
+      'post_status' => 'publish',
+      'orderby' => 'menu_order',
+      'order' => 'asc'
+    );
+    $my_posts = get_posts($query);
+    error_log( print_r( (array)$my_posts[0], True) );
+    if( $my_posts ) {
+        error_log( 'ID on the first post found '.$my_posts[0]->ID );
+    }
+
+    // Handling posts found
+    $struct = array( );
+    foreach ( (array)$my_posts as $post ) {
+        array_push($struct, _exapi_prepare_post( (array)$post, $params) );
+    }
+    return $struct;
+}
+
 /**
  * Returns an array with all information needed to build a tag cloud
  *
@@ -574,6 +633,8 @@ function exapi_register_methods( $methods ) {
     $methods['exapi.getPost'] = 'exapi_getPost';
     $methods['exapi.getPageByPath'] = 'exapi_getPageByPath';
     $methods['exapi.getPostByPath'] = 'exapi_getPostByPath';
+    $methods['exapi.getCustomPostByPath'] = 'exapi_getCustomPostByPath';
+    $methods['exapi.getCustomPostByParent'] = 'exapi_getCustomPostByParent';
     $methods['exapi.getSidebar'] = 'exapi_getSidebar';
     $methods['exapi.getPostsByCategory'] = 'exapi_getPostsByCategory';
     $methods['exapi.getArchivePosts'] = 'exapi_getArchivePosts';
