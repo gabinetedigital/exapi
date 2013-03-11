@@ -306,8 +306,9 @@ function exapi_getCustomPostByParent($args) {
     $query=array(
       'post_parent' => $the_parent,
       'post_type' => $post_type,
+      'numberposts' => -1,
       'post_status' => 'publish',
-      'orderby' => 'menu_order',
+      'orderby' => 'menu_order, post_date',
       'order' => 'asc'
     );
     $my_posts = get_posts($query);
