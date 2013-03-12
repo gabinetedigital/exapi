@@ -147,7 +147,7 @@ function _exapi_prepare_post($post, $params) {
         'excerpt' => exapi_post_excerpt($post),
         'content' => exapi_post_content($post),
         'post_status' => $post['post_status'],
-        'post_type' => get_post_type( $pid ), 
+        'post_type' => get_post_type( $pid ),
         'custom_fields' => $wp_xmlrpc_server->get_custom_fields($pid),
     );
 }
@@ -472,7 +472,7 @@ function exapi_getPosts($args) {
 
     global $post;
     global $wp_query;
-	
+
 	$params = array();
     if (isset($args[0])) {
         $params = _exapi_extract_params($args[0]);
@@ -525,6 +525,10 @@ function exapi_getComments($args) {
         if ($categoria != null) {
             $comment['categoria_sugestao'] = $categoria;
         }
+        $nao_exibir_nome = get_comment_meta ( $comment['comment_id'], 'nao_exibir_nome', true );
+        if ($nao_exibir_nome != null) {
+            $comment['nao_exibir_nome'] = $nao_exibir_nome;
+        }
         array_push($comentarios, $comment);
     }
 
@@ -536,6 +540,8 @@ function exapi_newComment($args) {
     if (strlen($args[3]['content']) == 0) {
         return new IXR_Error( 403, __('Error: please type a comment.'));
     }
+
+    // error_log(print_r($args, True));
 
     $param = array(
                    0 => $args[0],
@@ -551,6 +557,9 @@ function exapi_newComment($args) {
     if( $args[4]['categoria_sugestao'] ){
         add_comment_meta($comment_id, 'categoria_sugestao', $args[4]['categoria_sugestao'], true);
     }
+    if( $args[4]['nao_exibir_nome'] ){
+        add_comment_meta($comment_id, 'nao_exibir_nome', $args[4]['nao_exibir_nome'], true );
+    }
 
     return $comment_id;
 }
@@ -559,7 +568,7 @@ function exapi_search($args) {
     if (!is_array($args = _exapi_method_header($args))) {
         return $args;
     }
-	
+
 	$params = array();
     if (isset($args[0])) {
         $params = _exapi_extract_params($args[0]);
@@ -572,7 +581,7 @@ function exapi_search($args) {
         $posts[] = _exapi_prepare_post((array)$post, $params);
     }
     global $wp_query;
-	
+
 	$txtsearch = str_replace(" ", "+", $args[0]['s']);
 
     $pag =
@@ -622,9 +631,9 @@ function exapi_getAttachmentUrl($args){
 	if (!is_array($args = _exapi_method_header($args))) {
         return $args;
     }
-	
+
 	$url = wp_get_attachment_url( $args[0]['postid'] );
-	
+
 	return $url;
 }
 
