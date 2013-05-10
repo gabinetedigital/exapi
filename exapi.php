@@ -252,15 +252,17 @@ function exapi_getPagesByParent($args) {
     $orig = get_page_by_path($args[1], ARRAY_A);
 
     $parent_id = $orig['ID'];
-    $pages = get_posts(array('post_type'=>'page',
-                             'post_parent'=>$parent_id,
-                             'post_status'=>'publish',
-                             'sort_column' => 'menu_order',
-                             'sort_order' => 'ASC',
-                            ));
+    // $pages = get_posts(array('post_type'   =>'page',
+    //                          'post_parent' =>$parent_id,
+    //                          'post_status' =>'publish',
+    //                          'sort_column' => 'menu_order',
+    //                          'sort_order'  => 'ASC',
+    //                         ));
+    $pages = get_posts('post_type=page&post_parent='.$parent_id.'&post_status=publish&orderby=menu_order date');
 
     $params = isset($args[0]) ? _exapi_extract_params($args[0]) : array();
     $retorno = array();
+
     foreach( $pages as $p ){
         $page = _exapi_prepare_post( (array)$p, $params);
         foreach (array('format', 'categories', 'tags') as $key)
