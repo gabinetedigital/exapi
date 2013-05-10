@@ -131,6 +131,12 @@ function _exapi_prepare_post($post, $params) {
     global $wp_xmlrpc_server;
     $pid = $post['ID'];
     $post_date = exapi_post_date($post);
+
+    // error_log("_exapi_prepare_post ========================================= \/");
+    // error_log(print_r($params, true));
+    // error_log($post['ID']);
+    // error_log("_exapi_prepare_post ========================================= /\\");
+
     return array(
         'id' => (string) $pid,
         'title' => $post['post_title'],
@@ -235,6 +241,35 @@ function exapi_getPageByPath($args) {
     return $page;
 }
 
+function exapi_getPagesByParent($args) {
+    if (!is_array($args = _exapi_method_header($args)))
+        return $args;
+    if (!isset($args[1]))
+        return null;
+
+    wp_reset_query();
+
+    $orig = get_page_by_path($args[1], ARRAY_A);
+
+    $parent_id = $orig['ID'];
+    $pages = get_posts(array('post_type'=>'page',
+                             'post_parent'=>$parent_id,
+                             'post_status'=>'publish',
+                             'sort_column' => 'menu_order',
+                             'sort_order' => 'ASC',
+                            ));
+
+    $params = isset($args[0]) ? _exapi_extract_params($args[0]) : array();
+    $retorno = array();
+    foreach( $pages as $p ){
+        $page = _exapi_prepare_post( (array)$p, $params);
+        foreach (array('format', 'categories', 'tags') as $key)
+            unset($page[$key]);
+        $retorno[] = $page;
+    }
+    return $retorno;
+}
+
 /**
  * Returns all public informations of a page given it's path
  *
@@ -246,8 +281,6 @@ function exapi_getPostByPath($args) {
         return $args;
     if (!isset($args[1]))
         return null;
-    error_log(' ======================================== ARGS ======================================== ');
-    error_log(print_r($args, True));
     $the_slug = $args[1];
     $query=array(
       'name' => $the_slug,
@@ -256,10 +289,10 @@ function exapi_getPostByPath($args) {
       'numberposts' => 1
     );
     $my_posts = get_posts($query);
-    error_log( print_r( (array)$my_posts[0], True) );
-    if( $my_posts ) {
-        error_log( 'ID on the first post found '.$my_posts[0]->ID );
-    }
+
+    // if( $my_posts ) {
+    //     error_log( 'ID on the first post found '.$my_posts[0]->ID );
+    // }
     $post = _exapi_prepare_post( (array)$my_posts[0], $args);
     // return $my_posts[0];
     return $post;
@@ -643,6 +676,7 @@ function exapi_register_methods( $methods ) {
     $methods['exapi.getTagCloud'] = 'exapi_getTagCloud';
     $methods['exapi.getPost'] = 'exapi_getPost';
     $methods['exapi.getPageByPath'] = 'exapi_getPageByPath';
+    $methods['exapi.getPagesByParent'] = 'exapi_getPagesByParent';
     $methods['exapi.getPostByPath'] = 'exapi_getPostByPath';
     $methods['exapi.getCustomPostByPath'] = 'exapi_getCustomPostByPath';
     $methods['exapi.getCustomPostByParent'] = 'exapi_getCustomPostByParent';
@@ -659,5 +693,6 @@ function exapi_register_methods( $methods ) {
     return $methods;
 }
 add_filter( 'xmlrpc_methods', 'exapi_register_methods' );
+
 
 ?>
