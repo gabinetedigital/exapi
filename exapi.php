@@ -300,6 +300,40 @@ function exapi_getPostByPath($args) {
     return $post;
 }
 
+
+function exapi_getCustomPost($args) {
+    if (!is_array($args = _exapi_method_header($args)))
+        return $args;
+    if (!isset($args[1]))
+        return null;
+    if (!isset($args[2]))
+        return null;
+    error_log(' ======================================== ARGS ======================================== ');
+    error_log(print_r($args, True));
+    $the_id = $args[1];
+    $post_type = $args[2];
+    // $query=array(
+    //   'ID' => $the_id,
+    //   'post_type' => $post_type,
+    //   'post_status' => 'publish',
+    //   'numberposts' => 0
+    // );
+    // $my_posts = get_posts($query);
+    // $my_posts = get_posts('post_type='.$post_type.'&ID='.$the_id);
+    // $my_posts = query_posts('post_id='.$the_id.'&post_type='.$post_type);
+    $ids = array($the_id);
+    $my_posts = query_posts(array('post__in' => $ids,'post_type'=> $post_type));
+
+    error_log( print_r( (array)$my_posts[0], True) );
+    if( $my_posts ) {
+        error_log( 'ID on the first post found '.$my_posts[0]->ID );
+    }
+    $post = _exapi_prepare_post( (array)$my_posts[0], $args);
+    // return $my_posts[0];
+    return $post;
+}
+
+
 function exapi_getCustomPostByPath($args) {
     if (!is_array($args = _exapi_method_header($args)))
         return $args;
@@ -325,6 +359,52 @@ function exapi_getCustomPostByPath($args) {
     $post = _exapi_prepare_post( (array)$my_posts[0], $args);
     // return $my_posts[0];
     return $post;
+}
+
+function exapi_setPostCustomFields($args) {
+    if (!is_array($args = _exapi_method_header($args)))
+        return $args;
+    if (!isset($args[1]))
+        return null;
+    if (!isset($args[2]))
+        return null;
+    error_log(' ======================= ARGS SETPOSTCUSTOMFIELDS ============================= ');
+    error_log(print_r($args, True));
+    $post_id = $args[1];
+    $custom_fields = $args[2];
+
+    // $query=array(
+    //   'post_parent' => $the_parent,
+    //   'post_type' => $post_type,
+    //   'numberposts' => -1,
+    //   'post_status' => 'publish',
+    //   'orderby' => 'menu_order, post_date',
+    //   'order' => 'asc'
+    // );
+    // $my_posts = get_posts($query);
+
+    // $retpost =  edit_post(array(
+    //                 'post_ID' => $post_id,
+    //                 'custom_fields' => $custom_fields,
+    //             ));
+    foreach ($custom_fields as $cf) {
+        $key = $cf['key'];
+        $value = $cf['value'];
+        error_log("Updating:".$key."-".$value);
+        update_post_meta( $post_id, $key, $value );
+    }
+
+    // error_log( print_r( (array)$my_posts[0], True) );
+    // if( $my_posts ) {
+    //     error_log( 'ID on the first post found '.$my_posts[0]->ID );
+    // }
+
+    // Handling posts found
+    // $struct = array( );
+    // foreach ( (array)$my_posts as $post ) {
+    //     array_push($struct, _exapi_prepare_post( (array)$post, $params) );
+    // }
+    return $post_id;
 }
 
 function exapi_getCustomPostByParent($args) {
@@ -680,6 +760,7 @@ function exapi_register_methods( $methods ) {
     $methods['exapi.getPageByPath'] = 'exapi_getPageByPath';
     $methods['exapi.getPagesByParent'] = 'exapi_getPagesByParent';
     $methods['exapi.getPostByPath'] = 'exapi_getPostByPath';
+    $methods['exapi.getCustomPost'] = 'exapi_getCustomPost';
     $methods['exapi.getCustomPostByPath'] = 'exapi_getCustomPostByPath';
     $methods['exapi.getCustomPostByParent'] = 'exapi_getCustomPostByParent';
     $methods['exapi.getSidebar'] = 'exapi_getSidebar';
@@ -689,6 +770,7 @@ function exapi_register_methods( $methods ) {
     $methods['exapi.getComments'] = 'exapi_getComments';
     $methods['exapi.newComment'] = 'exapi_newComment';
     $methods['exapi.getPosts'] = 'exapi_getPosts';
+    $methods['exapi.setPostCustomFields'] = 'exapi_setPostCustomFields';
     $methods['exapi.search'] = 'exapi_search';
     $methods['exapi.getMenuItens'] = 'exapi_getMenuItens';
 	$methods['exapi.getAttachmentUrl'] = 'exapi_getAttachmentUrl';
