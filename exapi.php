@@ -141,6 +141,7 @@ function _exapi_prepare_post($post, $params) {
         'id' => (string) $pid,
         'title' => $post['post_title'],
         'slug' => $post['post_name'],
+        'parent' => $post['post_parent'],
         'date' => $post_date,
         'link' => post_permalink($pid),
         'format' => (($f = get_post_format($post)) === '' ? 'standard' : $f),
