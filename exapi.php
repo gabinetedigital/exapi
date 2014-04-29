@@ -97,7 +97,7 @@ function _exapi_extract_params(&$args) {
 function _exapi_method_header(&$args) {
     // We don't like smart-ass people
     global $wp_xmlrpc_server;
-    $wp_xmlrpc_server->escape( $args );
+    $wp_xmlrpc_server->escape( esc_attr($args) );
 
     // getting rid of blog_id
     array_shift($args);
