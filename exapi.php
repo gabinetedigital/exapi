@@ -658,18 +658,22 @@ function exapi_newComment($args) {
         return new IXR_Error( 403, __('Error: please type a comment.'));
     }
 
-    // error_log(print_r($args, True));
-
-    $param = array(
-                   0 => $args[0],
-                   1 => $args[4]['username'],
-                   2 => $args[4]['password'],
-                   3 => $args[4]['post_id'],
-                   4 => array(
-                              'comment_parent' => 0,
-                              'content' => $args[4]['content']));
-    global $wp_xmlrpc_server;
-    $comment_id = $wp_xmlrpc_server->wp_newComment($param);
+    $user = get_user_by('login', $args[4]['username'] );
+    $data = array(
+        'comment_post_ID' => $args[4]['post_id'],
+        'comment_author' => $user->user_nicename,
+        'comment_author_email' => $user->user_email,
+        'comment_author_url' => $user->user_url,
+        'comment_content' => $args[4]['content'],
+        'comment_type' => '',
+        'comment_parent' => 0,
+        'user_id' => $user->ID,
+        'comment_author_IP' => $args[4]['request_info']['ip'],
+        'comment_agent' => $args[4]['request_info']['agent'],
+        // 'comment_date' => $time,
+        'comment_approved' => 1,
+    );
+    $comment_id = wp_insert_comment($data);
 
     if( $args[4]['categoria_sugestao'] ){
         add_comment_meta($comment_id, 'categoria_sugestao', $args[4]['categoria_sugestao'], true);
